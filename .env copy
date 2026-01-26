@@ -1,0 +1,7 @@
+# Configuration in AppModule
+DB_HOST=----
+DB_PORT=----
+DB_USERNAME=-----
+# Database configuration Docker
+DB_PASSWORD=-------
+DB_NAME=-----
