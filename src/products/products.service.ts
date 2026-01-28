@@ -5,7 +5,7 @@ import { ProductMapper } from './mappers/product.mapper';
 import { QueryFailedError } from 'typeorm';
 import { ProductSlugService } from './services/product-slug.service';
 import { ProductRepository } from './repositories/product.repository';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationDto } from '../common/pagination/dto/pagination.dto';
 import { isUUID } from 'class-validator';
 import { Product } from './entities/product.entity';
 
