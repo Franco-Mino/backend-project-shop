@@ -17,8 +17,9 @@ export class CreateProductDto {
     @IsString()
     description?: string;
 
+    @IsOptional()
     @IsString()
-    slug: string;
+    slug?: string;
 
     @IsInt()
     @IsOptional()
@@ -30,5 +31,11 @@ export class CreateProductDto {
 
     @IsEnum(Gender, { each: true })
     gender: string[];
+
+
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    tags: string[];
 }
 
