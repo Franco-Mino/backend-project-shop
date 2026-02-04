@@ -3,20 +3,34 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/pagination/dto/pagination.dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateProductCommand } from './commands/create-product.command';
+import { UpdateProductCommand } from './commands/update-product.command';
+import { DeleteProductCommand } from './commands/delete-product.command';
+
+
+
+
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) { }
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly commandBus: CommandBus,
+  ) { }
 
+  // CREATE → Command
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+    return this.commandBus.execute(
+      new CreateProductCommand(createProductDto),
+    );
   }
 
+  // GETs → Service (queda igual)
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
-    console.log('paginationDto', paginationDto);
     return this.productsService.findAll(paginationDto);
   }
 
@@ -25,15 +39,23 @@ export class ProductsController {
     return this.productsService.findOne(term);
   }
 
+  // UPDATE → Command
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    return this.commandBus.execute(
+      new UpdateProductCommand(id, updateProductDto),
+    );
   }
 
+  // DELETE → Command
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.productsService.remove(id);
+    return this.commandBus.execute(
+      new DeleteProductCommand(id),
+    );
   }
 }
-
