@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { Product } from '../entities/product.entity';
+import { Product } from '../entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SlugService } from './slug.service';
 

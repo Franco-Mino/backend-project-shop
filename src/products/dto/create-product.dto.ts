@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
+import { IsArray, IsEnum, IsInt, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
 import { Gender } from "../enums/gender.enum";
 import { ProductSize } from "../enums/product-size.enum";
 
@@ -30,7 +30,7 @@ export class CreateProductDto {
     sizes: ProductSize[];
 
     @IsEnum(Gender, { each: true })
-    gender: string[];
+    gender: Gender[];
 
 
     @IsArray()

@@ -1,13 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Product } from '../entities/product.entity';
+import { isUUID } from 'class-validator';
+import { Product } from '../entities';
+import { PaginationDto } from 'src/common/pagination/dto/pagination.dto';
 
-/**
- * PRODUCT REPOSITORY - Operaciones especializadas
- * 
- * Responsabilidad: Queries eficientes
- * Simple, sin complejidad innecesaria
- */
 @Injectable()
 export class ProductRepository extends Repository<Product> {
 
@@ -15,29 +11,30 @@ export class ProductRepository extends Repository<Product> {
         super(Product, dataSource.createEntityManager());
     }
 
-    /**
-     * Obtener solo productos activos
-     * O(log n) con índice isActive
-     */
-    async findActive({ take = 10, skip = 0 }: { take?: number; skip?: number }) {
+    async findActive({ limit = 10, offset = 0 }: PaginationDto): Promise<Product[]> {
         return this.find({
             where: { isActive: true },
-            take,
-            skip,
+            relations: { images: true },
+            take: limit,
+            skip: offset,
         });
     }
 
-    /**
-     * Soft delete: marca como inactivo
-     */
-    async softDelete(id: string) {
-        return this.update({ id }, { isActive: false });
-    }
+    async findOneActiveBy(term: string): Promise<Product | null> {
+        if (!term?.trim()) {
+            throw new BadRequestException('Search term cannot be empty');
+        }
 
-    /**
-     * Hard delete: elimina permanente de BD
-     */
-    async hardDelete(id: string) {
-        return this.delete({ id });
+        const QueryBuilder = this.createQueryBuilder('product')
+            .leftJoinAndSelect('product.images', 'image')
+            .where('product.isActive = :isActive', { isActive: true });
+
+        if (isUUID(term)) {
+            QueryBuilder.andWhere('product.id = :term', { term });
+        } else {
+            QueryBuilder.andWhere('LOWER(product.slug) = LOWER(:term)', { term: term.trim() });
+        }
+
+        return QueryBuilder.getOne();
     }
 }

@@ -25,9 +25,10 @@ export class CreateProductHandler
             slug,
         });
 
-        return this.productTransactionService.createWithImages(
+        const product = await this.productTransactionService.createWithImages(
             productData,
             images,
         );
+        return { ...product, images };
     }
 }

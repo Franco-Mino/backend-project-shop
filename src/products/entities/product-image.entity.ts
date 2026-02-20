@@ -1,24 +1,21 @@
-import { Column, Entity, ManyToOne } from "typeorm";
-import { PrimaryGeneratedColumn } from "typeorm";
-import { Product } from "./product.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Product } from "./product-entity";
+
 @Entity()
 export class ProductImage {
 
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id: string; // ← era number, debe ser string porque usás uuid
 
     @Column('text')
     url: string;
 
     @Column('boolean', { default: true })
-    isActive: boolean; // true = activo, false = eliminado (soft delete)
-
+    isActive: boolean;
 
     @ManyToOne(
         () => Product,
         (product) => product.images,
-        { onDelete: 'CASCADE' }
     )
     product: Product;
-
 }

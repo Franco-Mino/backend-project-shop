@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, QueryRunner } from 'typeorm';
-import { Product } from '../entities/product.entity';
-import { ProductImage } from '../entities/product-image.entity';
+import { Product, ProductImage } from '../entities';
+
 
 @Injectable()
 export class ProductTransactionService {

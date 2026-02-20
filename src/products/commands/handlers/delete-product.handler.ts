@@ -22,7 +22,7 @@ export class DeleteProductHandler
       throw new NotFoundException(`Product not found`);
     }
 
-    await this.productRepository.softDelete(id);
+    await this.productRepository.update(id, { isActive: false });
 
     return { message: 'Product deleted' };
   }
