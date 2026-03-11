@@ -16,6 +16,7 @@ import { Product, ProductImage } from './entities';
 import { CreateProductHandler } from './commands/handlers/create-product.handler';
 import { UpdateProductHandler } from './commands/handlers/update-product.handler';
 import { DeleteProductHandler } from './commands/handlers/delete-product.handler';
+import { CreateProductCommand } from './commands/create-product.command';
 
 const CommandHandlers = [
   CreateProductHandler,
@@ -43,6 +44,8 @@ const CommandHandlers = [
   exports: [
     ProductsService,
     ProductRepository,
+    TypeOrmModule,
+    CqrsModule,
   ],
 })
 export class ProductsModule { }
