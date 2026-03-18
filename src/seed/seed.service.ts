@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
-import { CreateProductCommand } from '../products/commands/create-product.command';
+
+import { ProductsService } from '../products/products.service';
 import { CreateProductDto } from '../products/dto/create-product.dto';
 import { ProductSize } from '../products/enums/product-size.enum';
 import { Gender } from '../products/enums/gender.enum';
@@ -8,9 +8,7 @@ import { initialData, SeedProduct } from './data/seed-data';
 
 @Injectable()
 export class SeedService {
-  constructor(
-    private readonly commandBus: CommandBus,
-  ) { }
+  constructor(private readonly productsService: ProductsService) {}
 
   async runSeed() {
     await this.insertProducts();
@@ -18,14 +16,9 @@ export class SeedService {
   }
 
   private async insertProducts() {
-    const products = initialData.products;
-
-    const insertPromises = products.map((seedProduct) =>
-      this.commandBus.execute(
-        new CreateProductCommand(this.mapSeedProductToDto(seedProduct)),
-      ),
+    const insertPromises = initialData.products.map((seedProduct) =>
+      this.productsService.create(this.mapSeedProductToDto(seedProduct)),
     );
-
     await Promise.all(insertPromises);
   }
 

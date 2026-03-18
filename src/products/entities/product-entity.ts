@@ -3,7 +3,7 @@ import { Gender } from "../enums/gender.enum";
 import { ProductSize } from "../enums/product-size.enum";
 import { ProductImage } from './product-image.entity';
 
-@Entity()
+@Entity({ name: 'products' })
 @Index(['isActive']) // Optimiza búsqueda de productos activos
 @Index(['isActive', 'stock']) // Optimiza filtros combinados
 @Index(['slug'], { unique: true }) // Aseguro la unicidad del slug
