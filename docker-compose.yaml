@@ -1,14 +1,92 @@
-version: "3"
+version: "3.9"
 
 services:
+  # ───────────────────────────────────────────────
+  # Base de datos PostgreSQL
+  # ───────────────────────────────────────────────
   db:
-    image: postgres:14.3
-    restart: always
+    image: postgres:14.3-alpine
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    container_name: project-shop
+      POSTGRES_USER: ${DB_USERNAME}
+    container_name: project-shop-db
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ───────────────────────────────────────────────
+  # Aplicación NestJS
+  # ───────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: project-shop-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db          # nombre del servicio dentro de la red Docker
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      REFRESH_TOKEN_EXPIRES_DAYS: ${REFRESH_TOKEN_EXPIRES_DAYS}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
+      AWS_BUCKET_REGION: ${AWS_BUCKET_REGION}
+      AWS_PUBLIC_KEY: ${AWS_PUBLIC_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy   # espera a que postgres esté listo
+    networks:
+      - shop-network
+
+  # ───────────────────────────────────────────────
+  # pgAdmin (opcional — solo desarrollo local)
+  # Acceso: http://localhost:5050
+  # Email: admin@admin.com / Password: admin
+  # ───────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: project-shop-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - db
+    networks:
+      - shop-network
+    profiles:
+      - tools   # solo se levanta si corrés: docker-compose --profile tools up
+
+networks:
+  shop-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,39 @@
+# Dependencias — se reinstalan dentro del contenedor
+node_modules
+
+# Código compilado previo — se recompila dentro del contenedor
+dist
+
+# Archivos de entorno — NUNCA deben entrar a la imagen
+.env
+.env.*
+!.env.template
+
+# Git
+.git
+.gitignore
+
+# Docker (evitar recursión)
+Dockerfile
+docker-compose*.yaml
+.dockerignore
+
+# Logs
+*.log
+npm-debug.log*
+
+# Tests y coverage — no son necesarios en producción
+coverage
+test
+
+# Datos locales de Postgres (generados por docker-compose)
+postgres
+
+# Editor
+.vscode
+.idea
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
