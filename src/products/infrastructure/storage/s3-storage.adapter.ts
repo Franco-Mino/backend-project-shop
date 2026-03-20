@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   DeleteObjectCommand,
@@ -22,6 +22,7 @@ import { IStorageService } from '../../domain/ports/storage.service.port';
  */
 @Injectable()
 export class S3StorageAdapter implements IStorageService {
+  private readonly logger = new Logger(S3StorageAdapter.name);
   private readonly s3: S3Client;
   private readonly bucket: string;
   private readonly region: string;
@@ -42,15 +43,28 @@ export class S3StorageAdapter implements IStorageService {
     files: Express.Multer.File[],
     folder: string,
   ): Promise<string[]> {
-    return Promise.all(files.map((f) => this.uploadOne(f, folder)));
+    try {
+      return await Promise.all(files.map((f) => this.uploadOne(f, folder)));
+    } catch (error) {
+      this.logger.error(`S3 upload failed for folder "${folder}"`, error instanceof Error ? error.stack : String(error));
+      throw error;
+    }
   }
 
   async deleteFileByUrl(url: string): Promise<void> {
     const key = url.split('.amazonaws.com/')[1];
-    if (!key) return;
-    await this.s3.send(
-      new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
-    );
+    if (!key) {
+      this.logger.warn(`Could not extract S3 key from URL: "${url}"`);
+      return;
+    }
+    try {
+      await this.s3.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+      );
+    } catch (error) {
+      this.logger.error(`S3 delete failed for key "${key}"`, error instanceof Error ? error.stack : String(error));
+      throw error;
+    }
   }
 
   private async uploadOne(

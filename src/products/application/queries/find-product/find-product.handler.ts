@@ -1,4 +1,4 @@
-import { Inject, NotFoundException } from '@nestjs/common';
+import { Inject, Logger, NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 
 import { FindProductQuery } from './find-product.query';
@@ -21,6 +21,8 @@ import {
 export class FindProductHandler
   implements IQueryHandler<FindProductQuery, Product>
 {
+  private readonly logger = new Logger(FindProductHandler.name);
+
   constructor(
     @Inject(PRODUCT_REPOSITORY_PORT)
     private readonly productRepository: IProductRepository,
@@ -29,6 +31,7 @@ export class FindProductHandler
   async execute(query: FindProductQuery): Promise<Product> {
     const product = await this.productRepository.findByTerm(query.term);
     if (!product) {
+      this.logger.warn(`Product not found for term: "${query.term}"`);
       throw new NotFoundException(
         `Product with term "${query.term}" not found`,
       );

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
@@ -25,6 +25,8 @@ import { ProductPersistenceMapper } from '../mappers/product.persistence-mapper'
  */
 @Injectable()
 export class TypeOrmProductRepository implements IProductRepository {
+  private readonly logger = new Logger(TypeOrmProductRepository.name);
+
   constructor(
     @InjectRepository(ProductOrmEntity)
     private readonly productRepo: Repository<ProductOrmEntity>,
@@ -83,6 +85,7 @@ export class TypeOrmProductRepository implements IProductRepository {
       return ProductPersistenceMapper.toDomain(updated!);
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      this.logger.error(`DB transaction failed on update for product "${id}"`, error instanceof Error ? error.stack : String(error));
       throw error;
     } finally {
       await queryRunner.release();
