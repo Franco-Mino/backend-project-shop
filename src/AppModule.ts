@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 import { ProductsModule } from './products/products.module';
 import { SeedModule } from './seed/seed.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+
+    /**
+     * Rate limiting global — 60 req/min por IP por defecto.
+     * Los endpoints sensibles sobreescriben este límite con @Throttle().
+     */
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -22,8 +32,14 @@ import { SeedModule } from './seed/seed.module';
         synchronize: config.get<string>('NODE_ENV') !== 'production',
       }),
     }),
+
+    AuthModule,
     ProductsModule,
     SeedModule,
+  ],
+  providers: [
+    // ThrottlerGuard global — se aplica a todas las rutas automáticamente
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}
