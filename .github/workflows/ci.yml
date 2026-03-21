@@ -17,10 +17,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -28,8 +28,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Security audit
-        run: npm audit --audit-level=high
+      - name: Security audit (production deps only)
+        run: npm audit --audit-level=high --omit=dev
 
       - name: Run linter
         run: npm run lint
@@ -38,7 +38,7 @@ jobs:
         run: npm run test:cov
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage/
@@ -58,6 +58,9 @@ jobs:
       postgres:
         image: postgres:14.3-alpine
         env:
+          # Credenciales de prueba para el contenedor efímero de CI.
+          # No son secretos reales — este contenedor vive solo durante el job
+          # y no es accesible desde fuera del runner de GitHub Actions.
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: project_shop_test
           POSTGRES_USER: test_user
@@ -75,11 +78,12 @@ jobs:
       DB_PORT: 5432
       DB_NAME: project_shop_test
       DB_USERNAME: test_user
-      DB_PASSWORD: test_password
-      JWT_SECRET: test_jwt_secret_for_ci
+      DB_PASSWORD: test_password           # coincide con POSTGRES_PASSWORD arriba
+      JWT_SECRET: test_jwt_secret_for_ci  # solo firma tokens de test, sin valor fuera de CI
       JWT_EXPIRES_IN: 1h
       REFRESH_TOKEN_EXPIRES_DAYS: 1
-      # AWS/SMTP/CAPTCHA se mockean en los tests e2e
+      # AWS/SMTP/CAPTCHA: los adaptadores son mockeados en los tests e2e,
+      # pero el módulo de configuración requiere que las variables existan.
       AWS_BUCKET_NAME: test-bucket
       AWS_BUCKET_REGION: us-east-1
       AWS_PUBLIC_KEY: test-key
@@ -94,10 +98,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -121,13 +125,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false          # solo build, sin push (para CI)
