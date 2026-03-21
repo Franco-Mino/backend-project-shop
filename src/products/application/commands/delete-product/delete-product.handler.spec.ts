@@ -46,7 +46,9 @@ describe('DeleteProductHandler', () => {
 
     await handler.execute(new DeleteProductCommand(product.id));
 
-    expect(eventBus.publish).toHaveBeenCalledWith(new ProductDeletedEvent(product.id));
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      new ProductDeletedEvent(product.id),
+    );
   });
 
   it('should look up the product by the provided id', async () => {
@@ -65,7 +67,9 @@ describe('DeleteProductHandler', () => {
     repository.findById.mockResolvedValue(null);
     const id = faker.string.uuid();
 
-    await expect(handler.execute(new DeleteProductCommand(id))).rejects.toThrow(NotFoundException);
+    await expect(handler.execute(new DeleteProductCommand(id))).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('should NOT call softDelete when product is not found', async () => {

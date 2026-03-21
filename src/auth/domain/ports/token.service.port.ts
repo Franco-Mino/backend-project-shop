@@ -10,20 +10,20 @@ import { Role } from '../enums/role.enum';
 export const TOKEN_SERVICE_PORT = 'TOKEN_SERVICE_PORT';
 
 export interface JwtPayload {
-  sub: string;    // user id
+  sub: string; // user id
   email: string;
   roles: Role[];
 }
 
 export interface RefreshTokenPayload {
-  sub: string;    // user id
-  jti: string;    // ID del registro en BD — permite revocación
+  sub: string; // user id
+  jti: string; // ID del registro en BD — permite revocación
   type: 'refresh';
 }
 
 export interface GeneratedRefreshToken {
-  raw: string;    // JWT firmado — se entrega al cliente
-  jti: string;    // UUID — se guarda en BD
+  raw: string; // JWT firmado — se entrega al cliente
+  jti: string; // UUID — se guarda en BD
   expiresAt: Date;
 }
 

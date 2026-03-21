@@ -47,23 +47,23 @@ export class CreateProductRequestDto {
   @IsPositive()
   stock?: number;
 
-  @Transform(({ value }) =>
-    Array.isArray(value) ? value : value ? [value] : [],
+  @Transform(({ value }: { value: unknown }): unknown[] =>
+    Array.isArray(value) ? (value as unknown[]) : value ? [value] : [],
   )
   @IsArray()
   @IsEnum(ProductSize, { each: true })
   sizes: ProductSize[];
 
-  @Transform(({ value }) =>
-    Array.isArray(value) ? value : value ? [value] : [],
+  @Transform(({ value }: { value: unknown }): unknown[] =>
+    Array.isArray(value) ? (value as unknown[]) : value ? [value] : [],
   )
   @IsArray()
   @IsEnum(Gender, { each: true })
   gender: Gender[];
 
   @IsOptional()
-  @Transform(({ value }) =>
-    Array.isArray(value) ? value : value ? [value] : [],
+  @Transform(({ value }: { value: unknown }): unknown[] =>
+    Array.isArray(value) ? (value as unknown[]) : value ? [value] : [],
   )
   @IsArray()
   @IsString({ each: true })

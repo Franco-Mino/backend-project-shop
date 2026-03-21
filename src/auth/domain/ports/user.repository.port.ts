@@ -20,7 +20,9 @@ export interface IUserRepository {
   findAll(options: PaginationOptions): Promise<User[]>;
   update(
     id: string,
-    changes: Partial<Pick<User, 'email' | 'fullName' | 'password' | 'roles' | 'isActive'>>,
+    changes: Partial<
+      Pick<User, 'email' | 'fullName' | 'password' | 'roles' | 'isActive'>
+    >,
   ): Promise<User>;
   incrementFailedAttempts(id: string): Promise<void>;
   resetFailedAttempts(id: string): Promise<void>;

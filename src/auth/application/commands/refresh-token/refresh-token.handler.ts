@@ -35,11 +35,13 @@ export interface RefreshTokenResult {
  * porque el jti ya fue revocado.
  */
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenHandler
-  implements ICommandHandler<RefreshTokenCommand, RefreshTokenResult>
-{
+export class RefreshTokenHandler implements ICommandHandler<
+  RefreshTokenCommand,
+  RefreshTokenResult
+> {
   private readonly logger = new Logger(RefreshTokenHandler.name);
-  private static readonly INVALID_TOKEN_MSG = 'Invalid or expired refresh token';
+  private static readonly INVALID_TOKEN_MSG =
+    'Invalid or expired refresh token';
 
   constructor(
     @Inject(TOKEN_SERVICE_PORT)
@@ -71,7 +73,8 @@ export class RefreshTokenHandler
 
     // Emitir nuevos tokens
     const newAccessToken = this.tokenService.generateToken(user);
-    const { raw, jti, expiresAt } = this.tokenService.generateRefreshToken(user);
+    const { raw, jti, expiresAt } =
+      this.tokenService.generateRefreshToken(user);
 
     await this.refreshTokenRepository.create(
       RefreshToken.create({ id: jti, userId: user.id, expiresAt }),

@@ -2,7 +2,10 @@ import { faker } from '@faker-js/faker';
 
 import { ListProductsHandler } from './list-products.handler';
 import { ListProductsQuery } from './list-products.query';
-import { makeProduct, makeRepositoryMock } from '../../../__tests__/factories/product.factory';
+import {
+  makeProduct,
+  makeRepositoryMock,
+} from '../../../__tests__/factories/product.factory';
 
 describe('ListProductsHandler', () => {
   let handler: ListProductsHandler;
@@ -56,6 +59,9 @@ describe('ListProductsHandler', () => {
     const result = await handler.execute(new ListProductsQuery(10, 99999));
 
     expect(result).toEqual([]);
-    expect(repository.findAll).toHaveBeenCalledWith({ limit: 10, offset: 99999 });
+    expect(repository.findAll).toHaveBeenCalledWith({
+      limit: 10,
+      offset: 99999,
+    });
   });
 });

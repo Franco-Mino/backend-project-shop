@@ -30,9 +30,10 @@ const RESET_CODE_EXPIRY_MINUTES = 10;
  * sin revelar si el email existe en la base de datos.
  */
 @CommandHandler(RequestPasswordResetCommand)
-export class RequestPasswordResetHandler
-  implements ICommandHandler<RequestPasswordResetCommand, { message: string }>
-{
+export class RequestPasswordResetHandler implements ICommandHandler<
+  RequestPasswordResetCommand,
+  { message: string }
+> {
   private readonly logger = new Logger(RequestPasswordResetHandler.name);
 
   constructor(

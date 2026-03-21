@@ -73,7 +73,7 @@ import { AdminController } from './infrastructure/http/controllers/admin.control
       useFactory: (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: (configService.get('JWT_EXPIRES_IN', '24h') as string) as any,
+          expiresIn: configService.get('JWT_EXPIRES_IN', '24h'),
         },
       }),
     }),
@@ -86,8 +86,14 @@ import { AdminController } from './infrastructure/http/controllers/admin.control
     // Port → Adapter bindings (Dependency Inversion)
     { provide: USER_REPOSITORY_PORT, useClass: TypeOrmUserRepository },
     { provide: TOKEN_SERVICE_PORT, useClass: JwtTokenAdapter },
-    { provide: PASSWORD_RESET_TOKEN_REPOSITORY_PORT, useClass: TypeOrmPasswordResetTokenRepository },
-    { provide: REFRESH_TOKEN_REPOSITORY_PORT, useClass: TypeOrmRefreshTokenRepository },
+    {
+      provide: PASSWORD_RESET_TOKEN_REPOSITORY_PORT,
+      useClass: TypeOrmPasswordResetTokenRepository,
+    },
+    {
+      provide: REFRESH_TOKEN_REPOSITORY_PORT,
+      useClass: TypeOrmRefreshTokenRepository,
+    },
     { provide: EMAIL_SERVICE_PORT, useClass: NodemailerEmailAdapter },
     { provide: CAPTCHA_SERVICE_PORT, useClass: GoogleRecaptchaAdapter },
 
@@ -113,6 +119,7 @@ import { AdminController } from './infrastructure/http/controllers/admin.control
     PassportModule,
     JwtModule,
     USER_REPOSITORY_PORT,
+    TOKEN_SERVICE_PORT,
   ],
 })
 export class AuthModule {}

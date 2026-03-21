@@ -44,10 +44,15 @@ export class GoogleRecaptchaAdapter implements ICaptchaService {
         }),
       });
 
-      const data = (await response.json()) as { success: boolean; 'error-codes'?: string[] };
+      const data = (await response.json()) as {
+        success: boolean;
+        'error-codes'?: string[];
+      };
 
       if (!data.success) {
-        this.logger.warn(`reCAPTCHA rejected token. Errors: ${data['error-codes']?.join(', ')}`);
+        this.logger.warn(
+          `reCAPTCHA rejected token. Errors: ${data['error-codes']?.join(', ')}`,
+        );
       }
 
       return data.success;

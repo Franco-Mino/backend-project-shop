@@ -17,7 +17,10 @@ import { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
 
 import { AppModule } from 'src/AppModule';
-import { IEmailService, EMAIL_SERVICE_PORT } from 'src/auth/domain/ports/email.service.port';
+import {
+  IEmailService,
+  EMAIL_SERVICE_PORT,
+} from 'src/auth/domain/ports/email.service.port';
 
 // ─── Mock del servicio de email ──────────────────────────────────────────────
 // Reemplazamos el adaptador SMTP real por uno que no hace nada.
@@ -65,10 +68,9 @@ describe('Auth (e2e)', () => {
   // ─── Teardown ──────────────────────────────────────────────────────────────
   afterAll(async () => {
     // Limpiamos el usuario de prueba para no contaminar la DB de test
-    await dataSource.query(
-      `DELETE FROM users WHERE email = $1`,
-      [TEST_USER.email],
-    );
+    await dataSource.query(`DELETE FROM users WHERE email = $1`, [
+      TEST_USER.email,
+    ]);
     await app.close();
   });
 
@@ -167,9 +169,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('rechaza sin token (401)', async () => {
-      await request(app.getHttpServer())
-        .get('/api/auth/profile')
-        .expect(401);
+      await request(app.getHttpServer()).get('/api/auth/profile').expect(401);
     });
 
     it('rechaza con token inválido (401)', async () => {

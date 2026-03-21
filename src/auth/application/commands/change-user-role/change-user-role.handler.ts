@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ChangeUserRoleCommand } from './change-user-role.command';
@@ -22,9 +27,10 @@ import {
  * permita que la jerarquía sea corrompida por la API.
  */
 @CommandHandler(ChangeUserRoleCommand)
-export class ChangeUserRoleHandler
-  implements ICommandHandler<ChangeUserRoleCommand, User>
-{
+export class ChangeUserRoleHandler implements ICommandHandler<
+  ChangeUserRoleCommand,
+  User
+> {
   private readonly logger = new Logger(ChangeUserRoleHandler.name);
 
   constructor(
@@ -35,9 +41,7 @@ export class ChangeUserRoleHandler
   async execute(command: ChangeUserRoleCommand): Promise<User> {
     // Invariante 1: no se puede asignar el rol OWNER por API
     if (command.roles.includes(Role.OWNER)) {
-      throw new ForbiddenException(
-        'The OWNER role cannot be assigned via API',
-      );
+      throw new ForbiddenException('The OWNER role cannot be assigned via API');
     }
 
     const targetUser = await this.userRepository.findById(command.targetUserId);

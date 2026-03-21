@@ -28,6 +28,9 @@ export interface LoginResult {
   user: User;
 }
 
+/** Máximo de sesiones simultáneas por usuario. Al superar este límite se revoca la más antigua. */
+const MAX_ACTIVE_SESSIONS = 5;
+
 /**
  * COMMAND HANDLER — LoginHandler
  *
@@ -38,11 +41,15 @@ export interface LoginResult {
  *   4. Compara la contraseña
  *   5. En fallo: incrementa el contador de intentos
  *   6. En éxito: resetea el contador, genera access + refresh token
+ *      Si el usuario ya tiene MAX_ACTIVE_SESSIONS activas, revoca la más antigua.
  *
  * El error es siempre genérico para no revelar si el email existe.
  */
 @CommandHandler(LoginCommand)
-export class LoginHandler implements ICommandHandler<LoginCommand, LoginResult> {
+export class LoginHandler implements ICommandHandler<
+  LoginCommand,
+  LoginResult
+> {
   private readonly logger = new Logger(LoginHandler.name);
 
   constructor(
@@ -83,7 +90,10 @@ export class LoginHandler implements ICommandHandler<LoginCommand, LoginResult> 
       }
     }
 
-    const passwordMatches = await this.passwordService.compare(password, user.password);
+    const passwordMatches = await this.passwordService.compare(
+      password,
+      user.password,
+    );
 
     if (!passwordMatches) {
       await this.userRepository.incrementFailedAttempts(user.id);
@@ -100,12 +110,20 @@ export class LoginHandler implements ICommandHandler<LoginCommand, LoginResult> 
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Login exitoso — reset del contador y rotación de tokens
+    // Login exitoso — reset del contador y gestión de sesiones
     await this.userRepository.resetFailedAttempts(user.id);
-    await this.refreshTokenRepository.revokeAllByUserId(user.id);
+
+    // Multi-device: si el usuario ya tiene el máximo de sesiones activas,
+    // revoca la más antigua en lugar de revocar todas.
+    const activeSessions =
+      await this.refreshTokenRepository.countActiveByUserId(user.id);
+    if (activeSessions >= MAX_ACTIVE_SESSIONS) {
+      await this.refreshTokenRepository.revokeOldestByUserId(user.id);
+    }
 
     const token = this.tokenService.generateToken(user);
-    const { raw, jti, expiresAt } = this.tokenService.generateRefreshToken(user);
+    const { raw, jti, expiresAt } =
+      this.tokenService.generateRefreshToken(user);
 
     const refreshTokenEntity = RefreshToken.create({
       id: jti,

@@ -46,7 +46,10 @@ export class S3StorageAdapter implements IStorageService {
     try {
       return await Promise.all(files.map((f) => this.uploadOne(f, folder)));
     } catch (error) {
-      this.logger.error(`S3 upload failed for folder "${folder}"`, error instanceof Error ? error.stack : String(error));
+      this.logger.error(
+        `S3 upload failed for folder "${folder}"`,
+        error instanceof Error ? error.stack : String(error),
+      );
       throw error;
     }
   }
@@ -62,7 +65,10 @@ export class S3StorageAdapter implements IStorageService {
         new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
       );
     } catch (error) {
-      this.logger.error(`S3 delete failed for key "${key}"`, error instanceof Error ? error.stack : String(error));
+      this.logger.error(
+        `S3 delete failed for key "${key}"`,
+        error instanceof Error ? error.stack : String(error),
+      );
       throw error;
     }
   }

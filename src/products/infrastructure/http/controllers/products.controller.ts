@@ -73,9 +73,10 @@ export class ProductsController {
     @Body() dto: CreateProductRequestDto,
     @UploadedFiles(new FilesValidationPipe()) files: Express.Multer.File[],
   ): Promise<ProductResponseDto> {
-    const product = await this.commandBus.execute<CreateProductCommand, Product>(
-      new CreateProductCommand({ ...dto, files, createdById: user.id }),
-    );
+    const product = await this.commandBus.execute<
+      CreateProductCommand,
+      Product
+    >(new CreateProductCommand({ ...dto, files, createdById: user.id }));
     return ProductHttpMapper.toResponse(product);
   }
 
@@ -88,9 +89,10 @@ export class ProductsController {
     @Body() dto: UpdateProductRequestDto,
     @UploadedFiles(new FilesValidationPipe()) files: Express.Multer.File[],
   ): Promise<ProductResponseDto> {
-    const product = await this.commandBus.execute<UpdateProductCommand, Product>(
-      new UpdateProductCommand({ id, ...dto, files }),
-    );
+    const product = await this.commandBus.execute<
+      UpdateProductCommand,
+      Product
+    >(new UpdateProductCommand({ id, ...dto, files }));
     return ProductHttpMapper.toResponse(product);
   }
 

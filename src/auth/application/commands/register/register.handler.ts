@@ -56,9 +56,14 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand, User> {
     const created = await this.userRepository.create(user);
 
     // Best-effort: el email de bienvenida no debe bloquear el registro
-    this.emailService.sendWelcomeEmail(created.email, created.fullName).catch((err) => {
-      this.logger.error(`Welcome email failed for user ${created.id}`, err?.stack);
-    });
+    this.emailService
+      .sendWelcomeEmail(created.email, created.fullName)
+      .catch((err: unknown) => {
+        this.logger.error(
+          `Welcome email failed for user ${created.id}`,
+          err instanceof Error ? err.stack : String(err),
+        );
+      });
 
     return created;
   }

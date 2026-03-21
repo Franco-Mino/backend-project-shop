@@ -23,9 +23,10 @@ import {
  *   5. Actualiza la contraseña y marca el token como usado
  */
 @CommandHandler(ResetPasswordCommand)
-export class ResetPasswordHandler
-  implements ICommandHandler<ResetPasswordCommand, { message: string }>
-{
+export class ResetPasswordHandler implements ICommandHandler<
+  ResetPasswordCommand,
+  { message: string }
+> {
   private readonly logger = new Logger(ResetPasswordHandler.name);
 
   constructor(

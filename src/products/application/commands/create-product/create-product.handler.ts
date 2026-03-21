@@ -39,8 +39,10 @@ const S3_FOLDER = 'products';
  * las que tiene sentido en la capa de aplicación).
  */
 @CommandHandler(CreateProductCommand)
-export class CreateProductHandler
-  implements ICommandHandler<CreateProductCommand, Product> {
+export class CreateProductHandler implements ICommandHandler<
+  CreateProductCommand,
+  Product
+> {
   private readonly logger = new Logger(CreateProductHandler.name);
 
   constructor(
@@ -50,7 +52,7 @@ export class CreateProductHandler
     private readonly storageService: IStorageService,
     private readonly slugService: SlugDomainService,
     private readonly eventBus: EventBus,
-  ) { }
+  ) {}
 
   async execute(command: CreateProductCommand): Promise<Product> {
     const { files = [], images: urlImages = [], ...props } = command;

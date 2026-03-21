@@ -4,7 +4,9 @@ import { ProductImage } from './product-image.entity';
 import { Gender } from '../enums/gender.enum';
 import { ProductSize } from '../enums/product-size.enum';
 
-function makeProps(overrides: Partial<CreateProductProps> = {}): CreateProductProps {
+function makeProps(
+  overrides: Partial<CreateProductProps> = {},
+): CreateProductProps {
   return {
     id: faker.string.uuid(),
     title: faker.commerce.productName(),
@@ -18,7 +20,6 @@ function makeProps(overrides: Partial<CreateProductProps> = {}): CreateProductPr
 }
 
 describe('Product entity', () => {
-
   // ─── Product.create() ───────────────────────────────────────────────────────
 
   describe('create()', () => {
@@ -66,7 +67,10 @@ describe('Product entity', () => {
     });
 
     it('should assign provided images', () => {
-      const images = [ProductImage.create(faker.image.url()), ProductImage.create(faker.image.url())];
+      const images = [
+        ProductImage.create(faker.image.url()),
+        ProductImage.create(faker.image.url()),
+      ];
       const product = Product.create(makeProps({ images }));
       expect(product.images).toHaveLength(2);
       expect(product.images[0].url).toBe(images[0].url);

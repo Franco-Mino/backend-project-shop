@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ToggleUserStatusCommand } from './toggle-user-status.command';
@@ -18,9 +23,10 @@ import {
  * posibilidad de recuperarlo desde la propia API.
  */
 @CommandHandler(ToggleUserStatusCommand)
-export class ToggleUserStatusHandler
-  implements ICommandHandler<ToggleUserStatusCommand, User>
-{
+export class ToggleUserStatusHandler implements ICommandHandler<
+  ToggleUserStatusCommand,
+  User
+> {
   private readonly logger = new Logger(ToggleUserStatusHandler.name);
 
   constructor(

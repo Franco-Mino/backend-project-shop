@@ -47,4 +47,18 @@ export class TypeOrmRefreshTokenRepository implements IRefreshTokenRepository {
       { revokedAt: new Date() },
     );
   }
+
+  async countActiveByUserId(userId: string): Promise<number> {
+    return this.repo.count({ where: { userId, revokedAt: IsNull() } });
+  }
+
+  async revokeOldestByUserId(userId: string): Promise<void> {
+    const oldest = await this.repo.findOne({
+      where: { userId, revokedAt: IsNull() },
+      order: { expiresAt: 'ASC' },
+    });
+    if (oldest) {
+      await this.repo.update(oldest.id, { revokedAt: new Date() });
+    }
+  }
 }

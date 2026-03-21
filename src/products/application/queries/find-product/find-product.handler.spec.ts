@@ -3,7 +3,10 @@ import { faker } from '@faker-js/faker';
 
 import { FindProductHandler } from './find-product.handler';
 import { FindProductQuery } from './find-product.query';
-import { makeProduct, makeRepositoryMock } from '../../../__tests__/factories/product.factory';
+import {
+  makeProduct,
+  makeRepositoryMock,
+} from '../../../__tests__/factories/product.factory';
 
 describe('FindProductHandler', () => {
   let handler: FindProductHandler;
@@ -38,13 +41,17 @@ describe('FindProductHandler', () => {
     repository.findByTerm.mockResolvedValue(null);
     const term = faker.string.uuid();
 
-    await expect(handler.execute(new FindProductQuery(term))).rejects.toThrow(NotFoundException);
+    await expect(handler.execute(new FindProductQuery(term))).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('should include the term in the NotFoundException message', async () => {
     repository.findByTerm.mockResolvedValue(null);
     const term = 'non_existent_product';
 
-    await expect(handler.execute(new FindProductQuery(term))).rejects.toThrow(term);
+    await expect(handler.execute(new FindProductQuery(term))).rejects.toThrow(
+      term,
+    );
   });
 });

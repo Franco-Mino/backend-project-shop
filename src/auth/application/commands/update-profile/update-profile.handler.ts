@@ -1,4 +1,9 @@
-import { ConflictException, Inject, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { UpdateProfileCommand } from './update-profile.command';
@@ -15,9 +20,10 @@ import {
  * Si el email cambia, verifica que no esté en uso por otro usuario.
  */
 @CommandHandler(UpdateProfileCommand)
-export class UpdateProfileHandler
-  implements ICommandHandler<UpdateProfileCommand, User>
-{
+export class UpdateProfileHandler implements ICommandHandler<
+  UpdateProfileCommand,
+  User
+> {
   private readonly logger = new Logger(UpdateProfileHandler.name);
 
   constructor(

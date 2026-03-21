@@ -60,7 +60,9 @@ export class TypeOrmUserRepository implements IUserRepository {
 
   async update(
     id: string,
-    changes: Partial<Pick<User, 'email' | 'fullName' | 'password' | 'roles' | 'isActive'>>,
+    changes: Partial<
+      Pick<User, 'email' | 'fullName' | 'password' | 'roles' | 'isActive'>
+    >,
   ): Promise<User> {
     const updateData: Partial<UserOrmEntity> = {};
     if (changes.email !== undefined) updateData.email = changes.email;

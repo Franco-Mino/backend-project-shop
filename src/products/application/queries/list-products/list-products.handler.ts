@@ -16,9 +16,10 @@ import {
  * solo hay que envolver esta lógica con cache-aside pattern.
  */
 @QueryHandler(ListProductsQuery)
-export class ListProductsHandler
-  implements IQueryHandler<ListProductsQuery, Product[]>
-{
+export class ListProductsHandler implements IQueryHandler<
+  ListProductsQuery,
+  Product[]
+> {
   constructor(
     @Inject(PRODUCT_REPOSITORY_PORT)
     private readonly productRepository: IProductRepository,

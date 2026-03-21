@@ -29,7 +29,11 @@ import { ChangePasswordRequestDto } from '../dto/change-password.request.dto';
 import { RequestPasswordResetRequestDto } from '../dto/request-password-reset.request.dto';
 import { ResetPasswordRequestDto } from '../dto/reset-password.request.dto';
 import { RefreshTokenRequestDto } from '../dto/refresh-token.request.dto';
-import { AuthResponseDto, TokenPairResponseDto, UserResponseDto } from '../dto/auth.response.dto';
+import {
+  AuthResponseDto,
+  TokenPairResponseDto,
+  UserResponseDto,
+} from '../dto/auth.response.dto';
 import { UserHttpMapper } from '../mappers/user.http-mapper';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { GetUser } from '../decorators/get-user.decorator';
@@ -61,7 +65,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   async register(@Body() dto: RegisterRequestDto): Promise<UserResponseDto> {
-    const user = await this.commandBus.execute(
+    const user = await this.commandBus.execute<RegisterCommand, User>(
       new RegisterCommand({
         email: dto.email,
         password: dto.password,
@@ -82,13 +86,19 @@ export class AuthController {
         captchaToken: dto.captchaToken,
       }),
     );
-    return UserHttpMapper.toAuthResponse(result.token, result.refreshToken, result.user);
+    return UserHttpMapper.toAuthResponse(
+      result.token,
+      result.refreshToken,
+      result.user,
+    );
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
-  async refresh(@Body() dto: RefreshTokenRequestDto): Promise<TokenPairResponseDto> {
+  async refresh(
+    @Body() dto: RefreshTokenRequestDto,
+  ): Promise<TokenPairResponseDto> {
     const result: RefreshTokenResult = await this.commandBus.execute(
       new RefreshTokenCommand(dto.refreshToken),
     );
@@ -108,9 +118,7 @@ export class AuthController {
   async requestPasswordReset(
     @Body() dto: RequestPasswordResetRequestDto,
   ): Promise<{ message: string }> {
-    return this.commandBus.execute(
-      new RequestPasswordResetCommand(dto.email),
-    );
+    return this.commandBus.execute(new RequestPasswordResetCommand(dto.email));
   }
 
   @Post('password-reset/reset')
@@ -138,7 +146,7 @@ export class AuthController {
     @GetUser() user: User,
     @Body() dto: UpdateProfileRequestDto,
   ): Promise<UserResponseDto> {
-    const updated = await this.commandBus.execute(
+    const updated = await this.commandBus.execute<UpdateProfileCommand, User>(
       new UpdateProfileCommand(user.id, dto.email, dto.fullName),
     );
     return UserHttpMapper.toUserResponse(updated);

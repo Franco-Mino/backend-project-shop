@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { Role } from '../../../domain/enums/role.enum';
@@ -39,11 +44,16 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user: User = request.user;
+    const request = context.switchToHttp().getRequest<{ user: User }>();
+    const user = request.user;
 
-    const minRequiredWeight = Math.min(...requiredRoles.map((r) => ROLE_WEIGHT[r]));
-    const userMaxWeight = Math.max(0, ...(user?.roles ?? []).map((r) => ROLE_WEIGHT[r] ?? 0));
+    const minRequiredWeight = Math.min(
+      ...requiredRoles.map((r) => ROLE_WEIGHT[r]),
+    );
+    const userMaxWeight = Math.max(
+      0,
+      ...(user?.roles ?? []).map((r) => ROLE_WEIGHT[r] ?? 0),
+    );
 
     if (userMaxWeight < minRequiredWeight) {
       throw new ForbiddenException('Access denied: insufficient privileges');

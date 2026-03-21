@@ -66,7 +66,7 @@ export class AdminController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ChangeUserRoleRequestDto,
   ): Promise<UserResponseDto> {
-    const user = await this.commandBus.execute(
+    const user = await this.commandBus.execute<ChangeUserRoleCommand, User>(
       new ChangeUserRoleCommand(id, dto.roles),
     );
     return UserHttpMapper.toUserResponse(user);
@@ -82,7 +82,7 @@ export class AdminController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body('isActive') isActive: boolean,
   ): Promise<UserResponseDto> {
-    const user = await this.commandBus.execute(
+    const user = await this.commandBus.execute<ToggleUserStatusCommand, User>(
       new ToggleUserStatusCommand(id, isActive),
     );
     return UserHttpMapper.toUserResponse(user);

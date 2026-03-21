@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { faker } from '@faker-js/faker';
 
 import { UpdateProductHandler } from './update-product.handler';
@@ -35,7 +39,9 @@ describe('UpdateProductHandler', () => {
   });
 
   function makeCommand(
-    overrides: Partial<ConstructorParameters<typeof UpdateProductCommand>[0]> = {},
+    overrides: Partial<
+      ConstructorParameters<typeof UpdateProductCommand>[0]
+    > = {},
   ) {
     return new UpdateProductCommand({
       id: faker.string.uuid(),
@@ -51,7 +57,9 @@ describe('UpdateProductHandler', () => {
     repository.findById.mockResolvedValue(existing);
     repository.update.mockResolvedValue(updated);
 
-    const result = await handler.execute(makeCommand({ id: existing.id, title: 'New Title' }));
+    const result = await handler.execute(
+      makeCommand({ id: existing.id, title: 'New Title' }),
+    );
 
     expect(repository.update).toHaveBeenCalledWith(
       existing.id,
@@ -67,16 +75,22 @@ describe('UpdateProductHandler', () => {
     repository.findById.mockResolvedValue(existing);
     repository.update.mockResolvedValue(updated);
 
-    const newPrice = faker.number.float({ min: 1, max: 999, fractionDigits: 2 });
+    const newPrice = faker.number.float({
+      min: 1,
+      max: 999,
+      fractionDigits: 2,
+    });
     const newStock = faker.number.int({ min: 0, max: 200 });
 
-    await handler.execute(makeCommand({
-      id: existing.id,
-      price: newPrice,
-      stock: newStock,
-      sizes: [ProductSize.XL],
-      gender: [Gender.WOMEN],
-    }));
+    await handler.execute(
+      makeCommand({
+        id: existing.id,
+        price: newPrice,
+        stock: newStock,
+        sizes: [ProductSize.XL],
+        gender: [Gender.WOMEN],
+      }),
+    );
 
     expect(repository.update).toHaveBeenCalledWith(
       existing.id,
@@ -109,7 +123,9 @@ describe('UpdateProductHandler', () => {
     repository.findById.mockResolvedValue(existing);
     repository.update.mockResolvedValue(makeProduct());
 
-    await handler.execute(makeCommand({ id: existing.id, slug: 'custom_new_slug' }));
+    await handler.execute(
+      makeCommand({ id: existing.id, slug: 'custom_new_slug' }),
+    );
 
     expect(slugService.generate).toHaveBeenCalledWith('custom_new_slug');
   });
@@ -119,7 +135,9 @@ describe('UpdateProductHandler', () => {
     repository.findById.mockResolvedValue(existing);
     repository.update.mockResolvedValue(makeProduct());
 
-    await handler.execute(makeCommand({ id: existing.id, title: 'Same Title' }));
+    await handler.execute(
+      makeCommand({ id: existing.id, title: 'Same Title' }),
+    );
 
     // slugService.generate debería no llamarse para el mismo título,
     // o si se llama, no debería setear changes.slug.
@@ -140,13 +158,18 @@ describe('UpdateProductHandler', () => {
     storageService.uploadFiles.mockResolvedValue([s3Url]);
     repository.update.mockResolvedValue(makeProduct());
 
-    await handler.execute(makeCommand({
-      id: existing.id,
-      files: [newFile],
-      keepImages: [keptUrl],
-    }));
+    await handler.execute(
+      makeCommand({
+        id: existing.id,
+        files: [newFile],
+        keepImages: [keptUrl],
+      }),
+    );
 
-    expect(storageService.uploadFiles).toHaveBeenCalledWith([newFile], 'products');
+    expect(storageService.uploadFiles).toHaveBeenCalledWith(
+      [newFile],
+      'products',
+    );
     const imageFinalUrls = repository.update.mock.calls[0][2];
     expect(imageFinalUrls).toEqual(expect.arrayContaining([keptUrl, s3Url]));
   });
@@ -157,7 +180,9 @@ describe('UpdateProductHandler', () => {
     const keptUrls = [faker.image.url()];
     repository.update.mockResolvedValue(makeProduct());
 
-    await handler.execute(makeCommand({ id: existing.id, keepImages: keptUrls }));
+    await handler.execute(
+      makeCommand({ id: existing.id, keepImages: keptUrls }),
+    );
 
     const imageFinalUrls = repository.update.mock.calls[0][2];
     expect(imageFinalUrls).toEqual(keptUrls);
@@ -169,7 +194,9 @@ describe('UpdateProductHandler', () => {
     repository.findById.mockResolvedValue(existing);
     repository.update.mockResolvedValue(makeProduct());
 
-    await handler.execute(makeCommand({ id: existing.id, title: 'Only Title Change' }));
+    await handler.execute(
+      makeCommand({ id: existing.id, title: 'Only Title Change' }),
+    );
 
     const imageFinalUrls = repository.update.mock.calls[0][2];
     expect(imageFinalUrls).toBeUndefined();
@@ -181,7 +208,9 @@ describe('UpdateProductHandler', () => {
     repository.findById.mockResolvedValue(null);
     const id = faker.string.uuid();
 
-    await expect(handler.execute(makeCommand({ id }))).rejects.toThrow(NotFoundException);
+    await expect(handler.execute(makeCommand({ id }))).rejects.toThrow(
+      NotFoundException,
+    );
     expect(repository.update).not.toHaveBeenCalled();
   });
 
@@ -201,7 +230,11 @@ describe('UpdateProductHandler', () => {
     repository.findById.mockResolvedValue(existing);
 
     const files = Array.from({ length: 3 }, () => makeMulterFile());
-    const keepImages = [faker.image.url(), faker.image.url(), faker.image.url()];
+    const keepImages = [
+      faker.image.url(),
+      faker.image.url(),
+      faker.image.url(),
+    ];
 
     await expect(
       handler.execute(makeCommand({ id: existing.id, files, keepImages })),
@@ -221,9 +254,9 @@ describe('UpdateProductHandler', () => {
     storageService.uploadFiles.mockResolvedValue([s3Url]);
     repository.update.mockRejectedValue(new Error('DB failure'));
 
-    await expect(handler.execute(makeCommand({ id: existing.id, files }))).rejects.toThrow(
-      'DB failure',
-    );
+    await expect(
+      handler.execute(makeCommand({ id: existing.id, files })),
+    ).rejects.toThrow('DB failure');
 
     expect(storageService.deleteFileByUrl).toHaveBeenCalledWith(s3Url);
   });

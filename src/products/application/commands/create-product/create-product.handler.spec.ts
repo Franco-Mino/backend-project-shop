@@ -41,7 +41,11 @@ describe('CreateProductHandler', () => {
     repository.existsBySlug.mockResolvedValue(false);
   });
 
-  function makeCommand(overrides: Partial<ConstructorParameters<typeof CreateProductCommand>[0]> = {}) {
+  function makeCommand(
+    overrides: Partial<
+      ConstructorParameters<typeof CreateProductCommand>[0]
+    > = {},
+  ) {
     return new CreateProductCommand({
       title: faker.commerce.productName(),
       sizes: [ProductSize.M],
@@ -76,7 +80,11 @@ describe('CreateProductHandler', () => {
     await handler.execute(makeCommand());
 
     expect(eventBus.publish).toHaveBeenCalledWith(
-      new ProductCreatedEvent(savedProduct.id, savedProduct.title, savedProduct.slug),
+      new ProductCreatedEvent(
+        savedProduct.id,
+        savedProduct.title,
+        savedProduct.slug,
+      ),
     );
   });
 
@@ -126,9 +134,9 @@ describe('CreateProductHandler', () => {
     const files = Array.from({ length: 3 }, () => makeMulterFile());
     const images = [faker.image.url(), faker.image.url(), faker.image.url()];
 
-    await expect(handler.execute(makeCommand({ files, images }))).rejects.toThrow(
-      BadRequestException,
-    );
+    await expect(
+      handler.execute(makeCommand({ files, images })),
+    ).rejects.toThrow(BadRequestException);
     expect(repository.create).not.toHaveBeenCalled();
   });
 
@@ -139,7 +147,9 @@ describe('CreateProductHandler', () => {
     storageService.uploadFiles.mockResolvedValue(s3Urls);
     repository.create.mockResolvedValue(makeProduct());
 
-    await expect(handler.execute(makeCommand({ files, images }))).resolves.not.toThrow();
+    await expect(
+      handler.execute(makeCommand({ files, images })),
+    ).resolves.not.toThrow();
   });
 
   // ─── Validación de slug ──────────────────────────────────────────────────────
@@ -147,7 +157,9 @@ describe('CreateProductHandler', () => {
   it('should throw ConflictException when slug already exists', async () => {
     repository.existsBySlug.mockResolvedValue(true);
 
-    await expect(handler.execute(makeCommand())).rejects.toThrow(ConflictException);
+    await expect(handler.execute(makeCommand())).rejects.toThrow(
+      ConflictException,
+    );
     expect(repository.create).not.toHaveBeenCalled();
   });
 
@@ -159,7 +171,9 @@ describe('CreateProductHandler', () => {
     storageService.uploadFiles.mockResolvedValue([s3Url]);
     repository.create.mockRejectedValue(new Error('DB connection lost'));
 
-    await expect(handler.execute(makeCommand({ files }))).rejects.toThrow('DB connection lost');
+    await expect(handler.execute(makeCommand({ files }))).rejects.toThrow(
+      'DB connection lost',
+    );
 
     expect(storageService.deleteFileByUrl).toHaveBeenCalledWith(s3Url);
   });

@@ -17,9 +17,10 @@ import { ProductDeletedEvent } from '../../../domain/events/product-deleted.even
  *   3. Publica ProductDeletedEvent
  */
 @CommandHandler(DeleteProductCommand)
-export class DeleteProductHandler
-  implements ICommandHandler<DeleteProductCommand, { message: string }>
-{
+export class DeleteProductHandler implements ICommandHandler<
+  DeleteProductCommand,
+  { message: string }
+> {
   private readonly logger = new Logger(DeleteProductHandler.name);
 
   constructor(

@@ -14,9 +14,7 @@ import {
  * Lista paginada de todos los usuarios (admin only).
  */
 @QueryHandler(ListUsersQuery)
-export class ListUsersHandler
-  implements IQueryHandler<ListUsersQuery, User[]>
-{
+export class ListUsersHandler implements IQueryHandler<ListUsersQuery, User[]> {
   constructor(
     @Inject(USER_REPOSITORY_PORT)
     private readonly userRepository: IUserRepository,

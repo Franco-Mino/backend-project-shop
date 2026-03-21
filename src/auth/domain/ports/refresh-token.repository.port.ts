@@ -14,4 +14,10 @@ export interface IRefreshTokenRepository {
 
   /** Revoca todos los tokens activos del usuario (logout global). */
   revokeAllByUserId(userId: string): Promise<void>;
+
+  /** Cuenta los tokens activos (no revocados, no expirados) del usuario. */
+  countActiveByUserId(userId: string): Promise<number>;
+
+  /** Revoca el token activo más antiguo del usuario. */
+  revokeOldestByUserId(userId: string): Promise<void>;
 }

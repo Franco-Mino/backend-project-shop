@@ -33,9 +33,10 @@ const S3_FOLDER = 'products';
  *   5. Rollback de S3 si la DB falla
  */
 @CommandHandler(UpdateProductCommand)
-export class UpdateProductHandler
-  implements ICommandHandler<UpdateProductCommand, Product>
-{
+export class UpdateProductHandler implements ICommandHandler<
+  UpdateProductCommand,
+  Product
+> {
   private readonly logger = new Logger(UpdateProductHandler.name);
 
   constructor(
@@ -59,7 +60,8 @@ export class UpdateProductHandler
     const changes: Partial<Product> = {};
     if (props.title !== undefined) changes.title = props.title;
     if (props.price !== undefined) changes.price = props.price;
-    if (props.description !== undefined) changes.description = props.description;
+    if (props.description !== undefined)
+      changes.description = props.description;
     if (props.stock !== undefined) changes.stock = props.stock;
     if (props.sizes !== undefined) changes.sizes = props.sizes;
     if (props.gender !== undefined) changes.gender = props.gender;
@@ -98,7 +100,10 @@ export class UpdateProductHandler
 
       try {
         if (files.length > 0) {
-          const s3Urls = await this.storageService.uploadFiles(files, S3_FOLDER);
+          const s3Urls = await this.storageService.uploadFiles(
+            files,
+            S3_FOLDER,
+          );
           uploadedUrls.push(...s3Urls);
           this.logger.log(`Uploaded ${s3Urls.length} new images to S3`);
         }

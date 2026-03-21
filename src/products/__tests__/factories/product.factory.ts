@@ -8,7 +8,9 @@ import { IStorageService } from '../../domain/ports/storage.service.port';
 
 // ─── Product ────────────────────────────────────────────────────────────────
 
-export function makeProduct(overrides: Partial<Parameters<typeof Product.create>[0]> = {}): Product {
+export function makeProduct(
+  overrides: Partial<Parameters<typeof Product.create>[0]> = {},
+): Product {
   return Product.create({
     id: faker.string.uuid(),
     title: faker.commerce.productName(),
@@ -16,7 +18,10 @@ export function makeProduct(overrides: Partial<Parameters<typeof Product.create>
     stock: faker.number.int({ min: 0, max: 100 }),
     sizes: [ProductSize.M, ProductSize.L],
     gender: [Gender.UNISEX],
-    slug: faker.string.alpha(5).toLowerCase() + '_' + faker.string.alpha(4).toLowerCase(),
+    slug:
+      faker.string.alpha(5).toLowerCase() +
+      '_' +
+      faker.string.alpha(4).toLowerCase(),
     description: faker.lorem.sentence(),
     tags: [faker.lorem.word(), faker.lorem.word()],
     images: [],
@@ -29,7 +34,9 @@ export function makeProductImage(url?: string): ProductImage {
   return ProductImage.create(url ?? faker.image.url());
 }
 
-export function makeMulterFile(overrides: Partial<Express.Multer.File> = {}): Express.Multer.File {
+export function makeMulterFile(
+  overrides: Partial<Express.Multer.File> = {},
+): Express.Multer.File {
   return {
     fieldname: 'files',
     originalname: faker.system.fileName({ extensionCount: 1 }) + '.jpg',

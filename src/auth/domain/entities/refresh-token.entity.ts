@@ -1,5 +1,5 @@
 export interface CreateRefreshTokenProps {
-  id: string;         // jti — identificador único del token en BD
+  id: string; // jti — identificador único del token en BD
   userId: string;
   expiresAt: Date;
 }
@@ -12,7 +12,7 @@ export interface CreateRefreshTokenProps {
  * La revocación se realiza marcando revokedAt.
  */
 export class RefreshToken {
-  id: string;       // jti
+  id: string; // jti
   userId: string;
   expiresAt: Date;
   revokedAt: Date | null;

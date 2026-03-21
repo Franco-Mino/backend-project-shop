@@ -85,7 +85,10 @@ export class TypeOrmProductRepository implements IProductRepository {
       return ProductPersistenceMapper.toDomain(updated!);
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`DB transaction failed on update for product "${id}"`, error instanceof Error ? error.stack : String(error));
+      this.logger.error(
+        `DB transaction failed on update for product "${id}"`,
+        error instanceof Error ? error.stack : String(error),
+      );
       throw error;
     } finally {
       await queryRunner.release();

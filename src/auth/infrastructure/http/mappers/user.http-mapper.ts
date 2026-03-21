@@ -1,5 +1,9 @@
 import { User } from '../../../domain/entities/user.entity';
-import { AuthResponseDto, TokenPairResponseDto, UserResponseDto } from '../dto/auth.response.dto';
+import {
+  AuthResponseDto,
+  TokenPairResponseDto,
+  UserResponseDto,
+} from '../dto/auth.response.dto';
 
 /**
  * HTTP MAPPER — UserHttpMapper
@@ -22,7 +26,11 @@ export class UserHttpMapper {
     return users.map((u) => UserHttpMapper.toUserResponse(u));
   }
 
-  static toAuthResponse(token: string, refreshToken: string, user: User): AuthResponseDto {
+  static toAuthResponse(
+    token: string,
+    refreshToken: string,
+    user: User,
+  ): AuthResponseDto {
     return {
       token,
       refreshToken,
@@ -30,7 +38,10 @@ export class UserHttpMapper {
     };
   }
 
-  static toTokenPair(token: string, refreshToken: string): TokenPairResponseDto {
+  static toTokenPair(
+    token: string,
+    refreshToken: string,
+  ): TokenPairResponseDto {
     return { token, refreshToken };
   }
 }

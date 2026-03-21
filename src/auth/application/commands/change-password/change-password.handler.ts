@@ -1,4 +1,9 @@
-import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ChangePasswordCommand } from './change-password.command';
@@ -15,9 +20,10 @@ import {
  * actual para verificar identidad antes de actualizar.
  */
 @CommandHandler(ChangePasswordCommand)
-export class ChangePasswordHandler
-  implements ICommandHandler<ChangePasswordCommand, { message: string }>
-{
+export class ChangePasswordHandler implements ICommandHandler<
+  ChangePasswordCommand,
+  { message: string }
+> {
   private readonly logger = new Logger(ChangePasswordHandler.name);
 
   constructor(

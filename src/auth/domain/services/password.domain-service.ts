@@ -14,7 +14,10 @@ export class PasswordDomainService {
     return bcrypt.hash(plainPassword, this.SALT_ROUNDS);
   }
 
-  async compare(plainPassword: string, hashedPassword: string): Promise<boolean> {
+  async compare(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 }

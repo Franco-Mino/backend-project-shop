@@ -9,7 +9,11 @@ export class LoginCommand {
   readonly password: string;
   readonly captchaToken?: string;
 
-  constructor(props: { email: string; password: string; captchaToken?: string }) {
+  constructor(props: {
+    email: string;
+    password: string;
+    captchaToken?: string;
+  }) {
     this.email = props.email;
     this.password = props.password;
     this.captchaToken = props.captchaToken;

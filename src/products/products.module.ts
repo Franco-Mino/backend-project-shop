@@ -6,9 +6,7 @@ import { AuthModule } from '../auth/auth.module';
 
 // Domain
 import { SlugDomainService } from './domain/services/slug.domain-service';
-import {
-  PRODUCT_REPOSITORY_PORT,
-} from './domain/ports/product.repository.port';
+import { PRODUCT_REPOSITORY_PORT } from './domain/ports/product.repository.port';
 import { STORAGE_SERVICE_PORT } from './domain/ports/storage.service.port';
 
 // Application — Commands

@@ -15,7 +15,10 @@ import {
  * por eso se recomienda un TTL corto en producción (15 min).
  */
 @CommandHandler(LogoutCommand)
-export class LogoutHandler implements ICommandHandler<LogoutCommand, { message: string }> {
+export class LogoutHandler implements ICommandHandler<
+  LogoutCommand,
+  { message: string }
+> {
   private readonly logger = new Logger(LogoutHandler.name);
 
   constructor(

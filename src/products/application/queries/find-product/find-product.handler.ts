@@ -18,9 +18,10 @@ import {
  * En el futuro se puede agregar Redis aquí sin tocar nada más.
  */
 @QueryHandler(FindProductQuery)
-export class FindProductHandler
-  implements IQueryHandler<FindProductQuery, Product>
-{
+export class FindProductHandler implements IQueryHandler<
+  FindProductQuery,
+  Product
+> {
   private readonly logger = new Logger(FindProductHandler.name);
 
   constructor(

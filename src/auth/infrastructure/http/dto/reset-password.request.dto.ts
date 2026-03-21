@@ -1,4 +1,11 @@
-import { IsEmail, IsString, Length, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  Length,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class ResetPasswordRequestDto {
   @IsEmail()
@@ -12,7 +19,8 @@ export class ResetPasswordRequestDto {
   @MinLength(8)
   @MaxLength(50)
   @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'New password must have uppercase, lowercase and a number or special character',
+    message:
+      'New password must have uppercase, lowercase and a number or special character',
   })
   newPassword: string;
 }

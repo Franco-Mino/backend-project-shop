@@ -13,8 +13,8 @@ export class UpdateProductRequestDto extends PartialType(
   CreateProductRequestDto,
 ) {
   @IsOptional()
-  @Transform(({ value }) =>
-    Array.isArray(value) ? value : value ? [value] : [],
+  @Transform(({ value }: { value: unknown }): unknown[] =>
+    Array.isArray(value) ? (value as unknown[]) : value ? [value] : [],
   )
   @IsArray()
   @IsString({ each: true })
