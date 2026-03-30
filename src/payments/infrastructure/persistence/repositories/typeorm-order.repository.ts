@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { IOrderRepository } from '../../../domain/ports/order.repository.port';
+import {
+  FindAllOrdersOptions,
+  IOrderRepository,
+} from '../../../domain/ports/order.repository.port';
 import { Order } from '../../../domain/entities/order.entity';
 import { OrderOrmEntity } from '../entities/order.orm-entity';
 import { OrderPersistenceMapper } from '../mappers/order.persistence.mapper';
@@ -36,5 +39,32 @@ export class TypeOrmOrderRepository implements IOrderRepository {
       stripePaymentIntentId: paymentIntentId,
     });
     return orm ? OrderPersistenceMapper.toDomain(orm) : null;
+  }
+
+  async findByUserId(
+    userId: string,
+    opts: FindAllOrdersOptions,
+  ): Promise<Order[]> {
+    const orms = await this.repo.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+      take: opts.limit,
+      skip: opts.offset,
+    });
+    return orms.map((orm) => OrderPersistenceMapper.toDomain(orm));
+  }
+
+  async findAll(
+    opts: FindAllOrdersOptions,
+  ): Promise<{ orders: Order[]; total: number }> {
+    const [orms, total] = await this.repo.findAndCount({
+      order: { createdAt: 'DESC' },
+      take: opts.limit,
+      skip: opts.offset,
+    });
+    return {
+      orders: orms.map((orm) => OrderPersistenceMapper.toDomain(orm)),
+      total,
+    };
   }
 }

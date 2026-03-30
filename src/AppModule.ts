@@ -9,6 +9,7 @@ import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentsModule } from './payments/payments.module';
 import { LoggerModule } from './logger/logger.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { LoggerModule } from './logger/logger.module';
     }),
 
     LoggerModule,
+    HealthModule,
     AuthModule,
     ProductsModule,
     PaymentsModule,

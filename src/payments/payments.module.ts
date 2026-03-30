@@ -11,10 +11,13 @@ import { PAYMENT_SERVICE_PORT } from './domain/ports/payment.service.port';
 
 // Application — Commands
 import { CreateOrderHandler } from './application/commands/create-order/create-order.handler';
+import { CancelOrderHandler } from './application/commands/cancel-order/cancel-order.handler';
 import { HandleStripeWebhookHandler } from './application/commands/handle-stripe-webhook/handle-stripe-webhook.handler';
 
 // Application — Queries
 import { GetOrderHandler } from './application/queries/get-order/get-order.handler';
+import { ListUserOrdersHandler } from './application/queries/list-user-orders/list-user-orders.handler';
+import { ListAllOrdersHandler } from './application/queries/list-all-orders/list-all-orders.handler';
 
 // Infrastructure — Persistence
 import { OrderOrmEntity } from './infrastructure/persistence/entities/order.orm-entity';
@@ -32,7 +35,7 @@ import { PaymentsController } from './infrastructure/http/controllers/payments.c
  * Importa ProductsModule para tener acceso al PRODUCT_REPOSITORY_PORT,
  * que necesitamos para decrementar/restaurar stock.
  *
- * Importa AuthModule para usar JwtAuthGuard en los endpoints.
+ * Importa AuthModule para usar JwtAuthGuard y RolesGuard en los endpoints.
  */
 @Module({
   imports: [
@@ -55,10 +58,13 @@ import { PaymentsController } from './infrastructure/http/controllers/payments.c
 
     // CQRS Command Handlers
     CreateOrderHandler,
+    CancelOrderHandler,
     HandleStripeWebhookHandler,
 
     // CQRS Query Handlers
     GetOrderHandler,
+    ListUserOrdersHandler,
+    ListAllOrdersHandler,
   ],
 })
 export class PaymentsModule {}

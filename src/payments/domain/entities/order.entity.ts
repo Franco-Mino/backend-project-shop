@@ -55,6 +55,11 @@ export class Order {
     return Order.create({ ...this.toProps(), status: OrderStatus.FAILED });
   }
 
+  /** Transición: PENDING → CANCELLED (cancelación voluntaria por el usuario) */
+  cancel(): Order {
+    return Order.create({ ...this.toProps(), status: OrderStatus.CANCELLED });
+  }
+
   private toProps(): OrderProps {
     return {
       id: this.id,
