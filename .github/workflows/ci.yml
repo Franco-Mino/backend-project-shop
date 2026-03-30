@@ -82,6 +82,11 @@ jobs:
       JWT_SECRET: test_jwt_secret_for_ci  # solo firma tokens de test, sin valor fuera de CI
       JWT_EXPIRES_IN: 1h
       REFRESH_TOKEN_EXPIRES_DAYS: 1
+      # Stripe: el adaptador está mockeado en los tests e2e (overrideProvider),
+      # por lo que el constructor de StripePaymentAdapter nunca corre en CI.
+      # Estas variables existen como precaución defensiva.
+      STRIPE_SECRET_KEY: sk_test_placeholder_for_ci
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder_for_ci
       # AWS/SMTP/CAPTCHA: los adaptadores son mockeados en los tests e2e,
       # pero el módulo de configuración requiere que las variables existan.
       AWS_BUCKET_NAME: test-bucket

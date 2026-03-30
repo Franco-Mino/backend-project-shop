@@ -7,6 +7,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { ProductsModule } from './products/products.module';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
+import { PaymentsModule } from './payments/payments.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -33,8 +35,10 @@ import { AuthModule } from './auth/auth.module';
       }),
     }),
 
+    LoggerModule,
     AuthModule,
     ProductsModule,
+    PaymentsModule,
     SeedModule,
   ],
   providers: [

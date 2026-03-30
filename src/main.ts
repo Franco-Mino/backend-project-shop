@@ -1,11 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 
 import { AppModule } from './AppModule';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: true expone el Buffer original del request.
+  // Es necesario para verificar la firma HMAC del webhook de Stripe:
+  // si el body pasara primero por el JSON parser, la firma no coincidiría.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
+
+  // Reemplaza el logger de NestJS por pino (JSON estructurado, alta performance).
+  // Debe inicializarse antes que cualquier otro middleware para capturar todos los logs.
+  app.useLogger(app.get(Logger));
 
   // HTTP security headers: elimina X-Powered-By, previene clickjacking, MIME-sniffing, etc.
   app.use(helmet());
