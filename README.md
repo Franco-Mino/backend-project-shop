@@ -41,8 +41,11 @@ Arquitectura hexagonal (Ports & Adapters) + patrón CQRS.
 | ORM | TypeORM | 0.3 |
 | Autenticación | JWT + Passport | — |
 | Hash de contraseñas | bcrypt | 6 |
+| Pagos | Stripe (PaymentIntents + Webhooks) | — |
 | Email | Nodemailer (SMTP) | 8 |
 | Almacenamiento | AWS S3 SDK v3 | — |
+| Logging | nestjs-pino (JSON estructurado) | — |
+| Docs API | Swagger / OpenAPI | — |
 | Captcha | Google reCAPTCHA v2 | — |
 | Rate limiting | @nestjs/throttler | 6 |
 | Security headers | Helmet | 8 |
@@ -58,7 +61,9 @@ Arquitectura hexagonal (Ports & Adapters) + patrón CQRS.
 | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | 4.x | Levantar la DB y la app |
 | [Node.js](https://nodejs.org/) | 20 LTS | Desarrollo sin Docker |
 | [npm](https://www.npmjs.com/) | 10+ | Gestión de dependencias |
+| [Stripe CLI](https://docs.stripe.com/stripe-cli) | 1.21+ | Webhooks en local |
 | Cuenta de [AWS](https://aws.amazon.com/) | — | Bucket S3 para imágenes |
+| Cuenta de [Stripe](https://stripe.com/) | — | Procesamiento de pagos |
 | Cuenta SMTP | — | Envío de emails (Gmail, SendGrid, etc.) |
 
 ---
@@ -110,12 +115,12 @@ La primera vez tarda un poco porque construye la imagen Docker. Los siguientes a
 ### Paso 4 — Verificar que funciona
 
 ```bash
-curl http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@test.com","password":"TestPass1!","fullName":"Test User"}'
+curl http://localhost:3000/api/health
+# → { "status": "ok", "timestamp": "..." }
 ```
 
-Deberías recibir un JSON con `token` y `refreshToken`.
+También podés acceder a la documentación interactiva en:
+**[http://localhost:3000/api/docs](http://localhost:3000/api/docs)**
 
 ### Comandos útiles de Docker
 
@@ -181,6 +186,29 @@ npm run lint           # Corre ESLint (detecta errores de tipos y estilo)
 npm run format         # Formatea el código con Prettier
 ```
 
+### Levantar el Stripe CLI para webhooks (terminal separada)
+
+Cada vez que quieras probar el flujo de pagos, dejá esto corriendo en otra terminal:
+
+```bash
+stripe listen --forward-to localhost:3000/api/payments/webhook
+```
+
+Copia el `whsec_...` que imprime al arrancar y ponelo en `.env` como `STRIPE_WEBHOOK_SECRET`.
+
+> Si cerrás el CLI y lo volvés a abrir, el `whsec_...` cambia → actualizalo en `.env` y reiniciá el server.
+
+**Resumen del flujo de pago en modo test:**
+1. `POST /api/payments/checkout` → recibís `clientSecret`
+2. El frontend usa Stripe.js con ese `clientSecret` para capturar el pago
+3. Stripe envía el evento `payment_intent.succeeded` al CLI → el CLI lo redirige a tu server
+4. El server marca la orden como `PAID`
+
+Para simular un pago exitoso sin frontend:
+```bash
+stripe trigger payment_intent.succeeded
+```
+
 ---
 
 ## Variables de entorno
@@ -236,6 +264,15 @@ Copiá `.env.template` a `.env` y completá cada variable. Descripción completa
 | `SMTP_FROM` | Dirección remitente que verá el destinatario |
 
 **Configurar Gmail:** Andá a tu cuenta de Google → Seguridad → Verificación en dos pasos → Contraseñas de aplicaciones. Generá una para "Correo".
+
+### Stripe (pagos)
+
+| Variable | Descripción |
+|----------|-------------|
+| `STRIPE_SECRET_KEY` | Clave privada del servidor. `sk_test_...` en dev, `sk_live_...` en prod. [Dashboard](https://dashboard.stripe.com/apikeys) |
+| `STRIPE_WEBHOOK_SECRET` | Generado por el Stripe CLI al correr `stripe listen`. Cambia cada vez que reiniciás el CLI. |
+
+> En producción el `STRIPE_WEBHOOK_SECRET` se obtiene al crear el endpoint en el [Dashboard de Stripe](https://dashboard.stripe.com/webhooks), no desde el CLI.
 
 ### Captcha
 
@@ -361,43 +398,56 @@ Si en el futuro necesitás usar variables sensibles en CI (por ejemplo, para hac
 
 Base URL: `http://localhost:3000/api`
 
-### Autenticación
+### Auth
 
-| Método | Ruta | Descripción | Auth requerida |
-|--------|------|-------------|----------------|
-| `POST` | `/auth/register` | Registrar nuevo usuario | No |
-| `POST` | `/auth/login` | Login — devuelve `token` + `refreshToken` | No |
-| `POST` | `/auth/refresh` | Rotar access token usando `refreshToken` | No |
-| `POST` | `/auth/logout` | Revocar refresh tokens | JWT |
-| `GET` | `/auth/profile` | Ver perfil del usuario autenticado | JWT |
-| `PATCH` | `/auth/profile` | Editar nombre o email | JWT |
-| `PATCH` | `/auth/profile/password` | Cambiar contraseña | JWT |
-| `POST` | `/auth/password-reset/request` | Solicitar código de reset por email | No |
-| `POST` | `/auth/password-reset/reset` | Resetear contraseña con el código recibido | No |
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| `POST` | `/auth/register` | — | Registrar nuevo usuario |
+| `POST` | `/auth/login` | — | Login — devuelve `token` + `refreshToken` |
+| `POST` | `/auth/refresh` | — | Rotar access token usando `refreshToken` |
+| `POST` | `/auth/logout` | JWT | Revocar refresh tokens |
+| `GET` | `/auth/profile` | JWT | Ver perfil del usuario autenticado |
+| `PATCH` | `/auth/profile` | JWT | Editar nombre o email |
+| `PATCH` | `/auth/profile/password` | JWT | Cambiar contraseña |
+| `POST` | `/auth/password-reset/request` | — | Solicitar código de reset por email |
+| `POST` | `/auth/password-reset/reset` | — | Resetear contraseña con el código recibido |
+
+### Admin (usuarios)
+
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| `GET` | `/auth/users` | JWT + ADMIN | Listar todos los usuarios |
+| `PATCH` | `/auth/users/:id/role` | JWT + OWNER | Cambiar rol de un usuario |
+| `PATCH` | `/auth/users/:id/status` | JWT + ADMIN | Activar o desactivar una cuenta |
 
 ### Productos
 
-| Método | Ruta | Descripción | Auth requerida |
-|--------|------|-------------|----------------|
-| `GET` | `/products` | Listar productos (paginado) | No |
-| `GET` | `/products/:id` | Ver producto por ID o slug | No |
-| `POST` | `/products` | Crear producto con imágenes | JWT + Admin |
-| `PATCH` | `/products/:id` | Actualizar producto | JWT + Admin |
-| `DELETE` | `/products/:id` | Eliminar producto | JWT + Admin |
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| `GET` | `/products` | — | Listar productos (paginado con `?limit=10&offset=0`) |
+| `GET` | `/products/:term` | — | Buscar por UUID o slug |
+| `POST` | `/products` | JWT + ADMIN | Crear producto (soporta multipart/form-data para imágenes) |
+| `PATCH` | `/products/:id` | JWT + ADMIN | Actualizar producto |
+| `DELETE` | `/products/:id` | JWT + ADMIN | Eliminar producto (soft delete) |
 
-### Admin
+### Pagos
 
-| Método | Ruta | Descripción | Auth requerida |
-|--------|------|-------------|----------------|
-| `GET` | `/admin/users` | Listar todos los usuarios | JWT + Admin |
-| `PATCH` | `/admin/users/:id/role` | Cambiar rol de un usuario | JWT + Admin |
-| `PATCH` | `/admin/users/:id/status` | Activar o desactivar un usuario | JWT + Admin |
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| `POST` | `/payments/checkout` | JWT | Crear orden + PaymentIntent de Stripe |
+| `GET` | `/payments/orders` | JWT | Historial de órdenes del usuario (paginado) |
+| `GET` | `/payments/orders/:id` | JWT | Detalle de una orden propia |
+| `PATCH` | `/payments/orders/:id/cancel` | JWT | Cancelar orden en estado PENDING (restaura stock) |
+| `GET` | `/payments/admin/orders` | JWT + ADMIN | Todas las órdenes del sistema con total |
+| `POST` | `/payments/webhook` | — (firma HMAC) | Webhook de Stripe — no llamar manualmente |
 
-### Seed
+### Sistema
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/seed` | Poblar la DB con datos de ejemplo (solo en desarrollo) |
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| `GET` | `/health` | — | Health check (status + timestamp) |
+| `GET` | `/docs` | — | Swagger UI interactivo (solo en dev/test) |
+| `GET` | `/seed` | JWT + OWNER | Cargar datos de prueba en la DB |
 
 ### Cómo autenticarse en requests
 
@@ -575,9 +625,12 @@ Antes de deployar a producción, verificá cada punto:
 - [ ] `RECAPTCHA_SECRET_KEY` configurado (no vacío)
 - [ ] Credenciales AWS con permisos mínimos (solo S3 Put/Delete sobre el bucket específico)
 - [ ] SMTP con App Password, no la contraseña real de tu cuenta
+- [ ] `STRIPE_SECRET_KEY` en modo `sk_live_...` (no `sk_test_...`)
+- [ ] `STRIPE_WEBHOOK_SECRET` generado desde el Dashboard de Stripe (no desde el CLI)
+- [ ] Webhook registrado en dashboard.stripe.com con la URL pública del servidor
 - [ ] Imagen Docker construida desde el Dockerfile multi-stage (no `npm run start:dev`)
 - [ ] TypeORM `synchronize: false` en producción (ya está configurado así)
-- [ ] Ejecutar migraciones antes del primer deploy y en cada cambio de schema
+- [ ] Ejecutar `npm run migration:run` antes del primer deploy y en cada cambio de schema
 - [ ] Variables configuradas como secrets en el servicio de deployment (no como archivos .env en el servidor)
 
 ---
